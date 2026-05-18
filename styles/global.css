@@ -1,6 +1,7 @@
+@import "tailwindcss";
+
 html,
 body {
-  padding: 0;
   margin: 0;
   font-family:
     Inter,
@@ -15,6 +16,8 @@ body {
     Droid Sans,
     Helvetica Neue,
     sans-serif;
+  background: #f7f5ef;
+  color: #171717;
 }
 
 a {
