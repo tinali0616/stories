@@ -6,19 +6,19 @@
     "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4.3.0",
+    "@types/node": "^25.9.0",
+    "@types/react": "^19.2.14",
     "next": "latest",
+    "postcss": "^8.5.14",
     "react": "latest",
     "react-dom": "latest",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^6.0.3",
     "ws": "^8.20.1"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.0",
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/ws": "^8.18.1",
-    "postcss": "^8.5.14",
-    "tailwindcss": "^4.3.0",
-    "typescript": "latest"
+    "@types/ws": "^8.18.1"
   },
   "engines": {
     "node": ">=20.9.0"
