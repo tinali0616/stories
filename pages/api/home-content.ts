@@ -14,6 +14,7 @@ type TimelineItem = {
   date: string;
   tone: string;
   content: string;
+  imgUrl?: string;
 };
 
 type HomeContentResponse = {
@@ -53,6 +54,7 @@ function toTimelineItem(data: FirebaseFirestore.DocumentData): TimelineItem | nu
     date: getString(data.date),
     tone: getString(data.tone),
     content: getString(data.content),
+    imgUrl: getString(data.imgUrl) || undefined,
   };
 
   if (!item.title || !item.date || !item.tone || !item.content) {

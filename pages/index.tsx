@@ -14,6 +14,7 @@ type TimelineItem = {
   date: string;
   tone: string;
   content: string;
+  imgUrl?: string;
 };
 
 type HomeContentResponse = {
@@ -126,6 +127,7 @@ export default function Home() {
   const [syncStatus, setSyncStatus] = useState<'idle' | 'connecting' | 'connected' | 'offline'>(
     'idle',
   );
+  const [lightboxImage, setLightboxImage] = useState<TimelineItem | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const timelineSectionRef = useRef<HTMLElement | null>(null);
   const shouldScrollToTimelineRef = useRef(false);
@@ -262,6 +264,24 @@ export default function Home() {
       block: 'start',
     });
   }, [selectedTimelineIndex]);
+
+  useEffect(() => {
+    if (!lightboxImage) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setLightboxImage(null);
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [lightboxImage]);
 
   const selectTimeline = useCallback(
     (index: number) => {
@@ -435,23 +455,37 @@ export default function Home() {
                   <h3 className="text-xl font-medium md:mt-6 md:text-2xl">{item.title}</h3>
                   <div>
                     <p className="mt-4 inline-block border-2 border-[#4b332c] bg-[#f7f4ec] px-3 py-1 text-xs font-semibold md:text-sm">
-                    {item.date}
-                  </p>
-                  <button
-                    className="mx-auto block text-center mt-5 font-medium text-[#776400] transition hover:text-[#4b332c] disabled:cursor-not-allowed disabled:opacity-60"
-                    disabled={syncEnabled && !isPresenter}
-                    type="button"
-                  >
-                    查看詳情 →
-                  </button>
+                      {item.date}
+                    </p>
+                    <button
+                      className="mx-auto mt-5 block text-center font-medium text-[#776400] transition hover:text-[#4b332c] disabled:cursor-not-allowed disabled:opacity-60"
+                      disabled={syncEnabled && !isPresenter}
+                      type="button"
+                    >
+                      查看詳情 →
+                    </button>
                   </div>
                 </article>
               ))}
             </div>
 
             {selectedTimeline ? (
-              <article className="mt-8 flex items-center gap-8 border-[4px] border-[#ffd400] bg-[#f7f4ec] px-5 py-6 md:mt-20 md:px-10 md:py-10">
-                <div>
+              <article className="mt-8 grid gap-6 border-[4px] border-[#ffd400] bg-[#f7f4ec] px-5 py-6 md:mt-20 md:grid-cols-[minmax(0,360px)_1fr] md:items-center md:px-10 md:py-10">
+                {selectedTimeline.imgUrl ? (
+                  <button
+                    aria-label={`放大檢視 ${selectedTimeline.title}`}
+                    className="group cursor-zoom-in text-left"
+                    onClick={() => setLightboxImage(selectedTimeline)}
+                    type="button"
+                  >
+                    <img
+                      alt={selectedTimeline.title}
+                      className="w-full border-[3px] border-[#5b4038] bg-white object-cover shadow-[4px_4px_0_#3d2c24] transition group-hover:brightness-95"
+                      src={selectedTimeline.imgUrl}
+                    />
+                  </button>
+                ) : null}
+                <div className={selectedTimeline.imgUrl ? '' : 'md:col-span-2'}>
                   <h3 className="text-2xl font-medium md:text-3xl">{selectedTimeline.title}</h3>
                   <p className="mt-3 text-base leading-7 text-[#5f5a50] md:text-lg md:leading-8">
                     {selectedTimeline.content}
@@ -461,6 +495,31 @@ export default function Home() {
             ) : null}
           </div>
         </section>
+
+        {lightboxImage?.imgUrl ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+            onClick={() => setLightboxImage(null)}
+            role="presentation"
+          >
+            <div className="relative max-h-full w-full max-w-6xl">
+              <button
+                aria-label="關閉圖片"
+                className="absolute right-0 top-0 z-10 border-[3px] border-[#4b332c] bg-[#ffd400] px-4 py-2 text-sm font-bold text-[#776400] shadow-[3px_3px_0_#3d2c24]"
+                onClick={() => setLightboxImage(null)}
+                type="button"
+              >
+                關閉
+              </button>
+              <img
+                alt={lightboxImage.title}
+                className="max-h-[88vh] w-full border-[4px] border-[#ffd400] bg-white object-contain shadow-[6px_6px_0_#3d2c24]"
+                onClick={(event) => event.stopPropagation()}
+                src={lightboxImage.imgUrl}
+              />
+            </div>
+          </div>
+        ) : null}
 
         <footer className="border-t-[4px] border-[#6b652d] bg-[#eee8b3] px-4 py-10 text-[#9b9564] md:px-16">
           <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-8 md:flex-row md:justify-between">
