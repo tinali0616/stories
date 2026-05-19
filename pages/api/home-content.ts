@@ -72,14 +72,14 @@ export default async function handler(
     return;
   }
 
-  const db = getFirebaseDb();
-
-  if (!db) {
-    res.status(503).json({ error: 'firebase_not_configured' });
-    return;
-  }
-
   try {
+    const db = getFirebaseDb();
+
+    if (!db) {
+      res.status(503).json({ error: 'firebase_not_configured' });
+      return;
+    }
+
     const [charactersSnapshot, timelineSnapshot] = await Promise.all([
       db.collection('characters').orderBy('order', 'asc').get(),
       db.collection('timelineItems').orderBy('order', 'asc').get(),
@@ -101,7 +101,8 @@ export default async function handler(
       characters,
       timeline,
     });
-  } catch {
+  } catch (error) {
+    console.error('Failed to read home content from Firestore', error);
     res.status(500).json({ error: 'firebase_read_failed' });
   }
 }
