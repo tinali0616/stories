@@ -6,7 +6,6 @@ const dev = process.env.NODE_ENV !== 'production';
 const hostname = '0.0.0.0';
 const port = Number(process.env.PORT || 3000);
 const room = 'demo';
-const timelineCount = 4;
 const presenterKey = process.env.PRESENTER_KEY || 'demo-presenter-key';
 
 let selectedTimelineIndex = 0;
@@ -16,7 +15,7 @@ const app = next({ dev, hostname: 'localhost', port });
 const handle = app.getRequestHandler();
 
 function isValidIndex(index) {
-  return Number.isInteger(index) && index >= 0 && index < timelineCount;
+  return Number.isInteger(index) && index >= 0;
 }
 
 function send(client, message) {

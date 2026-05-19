@@ -1,60 +1,80 @@
 import Head from 'next/head';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const characters = [
-  {
-    name: 'Sonny',
-    desktopTitle: '前...',
-    mobileTitle: 'S',
-    text: '說壞不壞但好不到哪裡去',
-    tone: 'bg-[#ffd400]',
-  },
-  {
-    name: 'Welly',
-    desktopTitle: '現...',
-    mobileTitle: 'W',
-    text: '喊著新創但掌控欲極高',
-    tone: 'bg-[#f2cdc7]',
-  },
-  {
-    name: 'JiaJing',
-    desktopTitle: '課...',
-    mobileTitle: 'J',
-    text: '夾縫中求生存時不時被威脅的',
-    tone: 'bg-[#e4dfab]',
-  },
-];
+type Character = {
+  name: string;
+  desktopTitle: string;
+  mobileTitle: string;
+  text: string;
+  tone: string;
+};
 
-const timeline = [
-  {
-    title: '調薪＆升遷',
-    date: '2024-01-01',
-    tone: 'bg-[#ffe070]',
-    content:
-      '被擋 晉升請客群組',
-  },
-  {
-    title: '組織異動',
-    date: '2024-03-15',
-    tone: 'bg-[#e7e2d7]',
-    content:
-      '副總被拔掉 S狀態不對 S確認離職 一開始以為是 w 代理部長 直接變成部長',
-  },
-  {
-    title: '部門未來發展＆離職',
-    date: '2024-06-20',
-    tone: 'bg-[#f4cfc7]',
-    content:
-      '部門合併 跨職能 對部長負責 未來發展不妙 前面有一半都在說 web 應用',
-  },
-  {
-    title: '微觀管理',
-    date: '2024-06-20',
-    tone: 'bg-[#f4cfc7]',
-    content:
-      '直接把 sean 的事情排開拉去做訂單頁  直接找yuki 指派不重要的任務',
-  },
-];
+type TimelineItem = {
+  title: string;
+  date: string;
+  tone: string;
+  content: string;
+};
+
+type HomeContentResponse = {
+  characters: Character[];
+  timeline: TimelineItem[];
+};
+
+// const fallbackCharacters: Character[] = [
+//   {
+//     name: 'Sonny',
+//     desktopTitle: '前...',
+//     mobileTitle: 'S',
+//     text: '說壞不壞但好不到哪裡去',
+//     tone: 'bg-[#ffd400]',
+//   },
+//   {
+//     name: 'Welly',
+//     desktopTitle: '現...',
+//     mobileTitle: 'W',
+//     text: '喊著新創但掌控欲極高',
+//     tone: 'bg-[#f2cdc7]',
+//   },
+//   {
+//     name: 'JiaJing',
+//     desktopTitle: '課...',
+//     mobileTitle: 'J',
+//     text: '夾縫中求生存時不時被威脅的',
+//     tone: 'bg-[#e4dfab]',
+//   },
+// ];
+ 
+// const fallbackTimeline: TimelineItem[] = [
+//   {
+//     title: '調薪＆升遷',
+//     date: '2024-01-01',
+//     tone: 'bg-[#ffe070]',
+//     content:
+//       '被擋 晉升請客群組',
+//   },
+//   {
+//     title: '組織異動',
+//     date: '2024-03-15',
+//     tone: 'bg-[#e7e2d7]',
+//     content:
+//       '副總無預警被拔掉 Sonny狀態不對 Sonny公布確認離職 一開始以為 Welly 只是代理部長，結果直接變成部長',
+//   },
+//   {
+//     title: '部門未來發展＆離職',
+//     date: '2024-06-20',
+//     tone: 'bg-[#f4cfc7]',
+//     content:
+//       '覺得 Web 架構與應用的合作有問題，大概前面開頭都在暗指我們有問題，所有人對部長負責，能力大於職稱，能力與薪水掛鉤，隨時發動 PIP 課長也會被 PIP，懷疑此偷威脅佳菁，部門合併 跨職能 未來發展不妙 前面有一半都在說 web 應用',
+//   },
+//   {
+//     title: '微觀管理',
+//     date: '2024-06-20',
+//     tone: 'bg-[#f4cfc7]',
+//     content:
+//       '直接把 sean 的事情排開拉去做訂單頁  直接找yuki 指派不重要的任務',
+//   },
+// ];
 
 const ROOM_ID = 'demo';
 const SYNC_STORAGE_KEY = 'pixel-tales-sync-enabled';
@@ -97,6 +117,9 @@ function PixelIcon({ label, tone }: { label: string; tone: string }) {
 }
 
 export default function Home() {
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [timeline, setTimeline] = useState<TimelineItem[]>([]);
+  const [contentStatus, setContentStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [selectedTimelineIndex, setSelectedTimelineIndex] = useState(0);
   const [syncEnabled, setSyncEnabled] = useState(false);
   const [isPresenter, setIsPresenter] = useState(false);
@@ -110,6 +133,48 @@ export default function Home() {
 
   useEffect(() => {
     setSyncEnabled(sessionStorage.getItem(SYNC_STORAGE_KEY) === 'true');
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadHomeContent() {
+      try {
+        const response = await fetch('/api/home-content', {
+          method: 'POST',
+        });
+
+        if (!response.ok) {
+          setContentStatus('error');
+          return;
+        }
+
+        const data = (await response.json()) as HomeContentResponse;
+
+        if (cancelled || !data.characters.length || !data.timeline.length) {
+          if (!cancelled) {
+            setContentStatus('error');
+          }
+          return;
+        }
+
+        setCharacters(data.characters);
+        setTimeline(data.timeline);
+        setSelectedTimelineIndex((index) => (index < data.timeline.length ? index : 0));
+        setContentStatus('ready');
+      } catch {
+        if (!cancelled) {
+          setContentStatus('error');
+        }
+        return;
+      }
+    }
+
+    loadHomeContent();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -305,6 +370,14 @@ export default function Home() {
             </h2>
 
             <div className="mt-6 grid gap-4 md:mt-12 md:grid-cols-3 md:gap-10">
+              {contentStatus === 'loading' ? (
+                <p className="text-sm font-semibold text-[#5f5a50]">資料載入中...</p>
+              ) : null}
+              {contentStatus === 'error' && !characters.length ? (
+                <p className="text-sm font-semibold text-[#5f5a50]">
+                  目前無法取得故事主角資料。
+                </p>
+              ) : null}
               {characters.map((character, index) => (
                 <article
                   className={`border-[3px] border-[#5b4038] bg-[#f7f4ec] p-4 shadow-[4px_4px_0_#3d2c24] md:min-h-[250px] md:p-8 md:text-center ${
@@ -343,37 +416,49 @@ export default function Home() {
 
             <div className="relative mt-6 flex gap-4 overflow-x-auto pb-4 md:mt-14 md:gap-10">
               <div className="absolute left-10 right-0 top-16 hidden h-1 bg-[#d9d4c8] md:block" />
+              {contentStatus === 'loading' ? (
+                <p className="text-sm font-semibold text-[#5f5a50]">資料載入中...</p>
+              ) : null}
+              {contentStatus === 'error' && !timeline.length ? (
+                <p className="text-sm font-semibold text-[#5f5a50]">
+                  目前無法取得冒險回憶錄資料。
+                </p>
+              ) : null}
               {timeline.map((item, index) => (
                 <article
-                  className={`relative z-10 w-[212px] shrink-0 border-[3px] border-[#5b4038] p-5 text-center shadow-[4px_4px_0_#3d2c24] md:w-[300px] md:p-8 lg:w-[360px] ${
+                  className={`relative z-10 shrink-0 border-[3px] border-[#5b4038] p-5 text-center shadow-[4px_4px_0_#3d2c24] md:w-[300px] md:p-5 lg:w-[360px] ${
                     selectedTimelineIndex === index ? 'bg-[#ffe070]' : 'bg-[#e7e2d7]'
                   } ${syncEnabled && !isPresenter ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                   key={item.title}
                   onClick={() => selectTimeline(index)}
                 >
                   <h3 className="text-xl font-medium md:mt-6 md:text-2xl">{item.title}</h3>
-                  <span className="mt-4 inline-block border-2 border-[#4b332c] bg-[#f7f4ec] px-3 py-1 text-xs font-semibold md:text-sm">
+                  <div>
+                    <p className="mt-4 inline-block border-2 border-[#4b332c] bg-[#f7f4ec] px-3 py-1 text-xs font-semibold md:text-sm">
                     {item.date}
-                  </span>
+                  </p>
                   <button
-                    className="mt-5 font-medium text-[#776400] transition hover:text-[#4b332c] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mx-auto block text-center mt-5 font-medium text-[#776400] transition hover:text-[#4b332c] disabled:cursor-not-allowed disabled:opacity-60"
                     disabled={syncEnabled && !isPresenter}
                     type="button"
                   >
                     查看詳情 →
                   </button>
+                  </div>
                 </article>
               ))}
             </div>
 
-            <article className="mt-8 flex items-center gap-8 border-[4px] border-[#ffd400] bg-[#f7f4ec] px-5 py-6 md:mt-20 md:px-10 md:py-10">
-              <div>
-                <h3 className="text-2xl font-medium md:text-3xl">{selectedTimeline.title}</h3>
-                <p className="mt-3 text-base leading-7 text-[#5f5a50] md:text-lg md:leading-8">
-                  {selectedTimeline.content}
-                </p>
-              </div>
-            </article>
+            {selectedTimeline ? (
+              <article className="mt-8 flex items-center gap-8 border-[4px] border-[#ffd400] bg-[#f7f4ec] px-5 py-6 md:mt-20 md:px-10 md:py-10">
+                <div>
+                  <h3 className="text-2xl font-medium md:text-3xl">{selectedTimeline.title}</h3>
+                  <p className="mt-3 text-base leading-7 text-[#5f5a50] md:text-lg md:leading-8">
+                    {selectedTimeline.content}
+                  </p>
+                </div>
+              </article>
+            ) : null}
           </div>
         </section>
 
