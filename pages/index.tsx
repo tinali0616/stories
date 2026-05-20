@@ -268,8 +268,8 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>PixelTales Studio</title>
-        <meta name="description" content="像素冒險故事集切版頁面" />
+        <title>上個班怎mo這mo辛苦</title>
+        <meta name="description" content="上個班怎mo這mo辛苦" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
