@@ -62,6 +62,13 @@ function PixelIcon({ label, tone }: { label: string; tone: string }) {
   );
 }
 
+function splitSentences(content: string) {
+  return content
+    .split(/(?<=[。！？!?])\s*/)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+}
+
 export default function Home() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [timeline, setTimeline] = useState<TimelineItem[]>([]);
@@ -432,9 +439,11 @@ export default function Home() {
                 ) : null}
                 <div className={selectedTimeline.imgUrl ? '' : 'md:col-span-2'}>
                   <h3 className="text-2xl font-medium md:text-3xl">{selectedTimeline.title}</h3>
-                  <p className="mt-3 text-base leading-7 text-[#5f5a50] md:text-lg md:leading-8">
-                    {selectedTimeline.content}
-                  </p>
+                  <div className="mt-3 space-y-3 text-base leading-7 text-[#5f5a50] md:text-lg md:leading-8">
+                    {splitSentences(selectedTimeline.content).map((sentence, index) => (
+                      <p key={`${selectedTimeline.title}-${index}`}>{sentence}</p>
+                    ))}
+                  </div>
                 </div>
               </article>
             ) : null}
