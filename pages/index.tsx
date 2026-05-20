@@ -22,61 +22,6 @@ type HomeContentResponse = {
   timeline: TimelineItem[];
 };
 
-// const fallbackCharacters: Character[] = [
-//   {
-//     name: 'Sonny',
-//     desktopTitle: '前...',
-//     mobileTitle: 'S',
-//     text: '說壞不壞但好不到哪裡去',
-//     tone: 'bg-[#ffd400]',
-//   },
-//   {
-//     name: 'Welly',
-//     desktopTitle: '現...',
-//     mobileTitle: 'W',
-//     text: '喊著新創但掌控欲極高',
-//     tone: 'bg-[#f2cdc7]',
-//   },
-//   {
-//     name: 'JiaJing',
-//     desktopTitle: '課...',
-//     mobileTitle: 'J',
-//     text: '夾縫中求生存時不時被威脅的',
-//     tone: 'bg-[#e4dfab]',
-//   },
-// ];
- 
-// const fallbackTimeline: TimelineItem[] = [
-//   {
-//     title: '調薪＆升遷',
-//     date: '2024-01-01',
-//     tone: 'bg-[#ffe070]',
-//     content:
-//       '被擋 晉升請客群組',
-//   },
-//   {
-//     title: '組織異動',
-//     date: '2024-03-15',
-//     tone: 'bg-[#e7e2d7]',
-//     content:
-//       '副總無預警被拔掉 Sonny狀態不對 Sonny公布確認離職 一開始以為 Welly 只是代理部長，結果直接變成部長',
-//   },
-//   {
-//     title: '部門未來發展＆離職',
-//     date: '2024-06-20',
-//     tone: 'bg-[#f4cfc7]',
-//     content:
-//       '覺得 Web 架構與應用的合作有問題，大概前面開頭都在暗指我們有問題，所有人對部長負責，能力大於職稱，能力與薪水掛鉤，隨時發動 PIP 課長也會被 PIP，懷疑此偷威脅佳菁，部門合併 跨職能 未來發展不妙 前面有一半都在說 web 應用',
-//   },
-//   {
-//     title: '微觀管理',
-//     date: '2024-06-20',
-//     tone: 'bg-[#f4cfc7]',
-//     content:
-//       '直接把 sean 的事情排開拉去做訂單頁  直接找yuki 指派不重要的任務',
-//   },
-// ];
-
 const ROOM_ID = 'demo';
 const SYNC_STORAGE_KEY = 'pixel-tales-sync-enabled';
 
@@ -332,7 +277,7 @@ export default function Home() {
         <header className="border-b-[5px] border-[#4b332c] bg-[#776400] text-white shadow-[0_4px_0_#c6bd78]">
           <div className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-3 md:px-16 md:py-4">
             <a className="text-xl font-semibold md:text-5xl" href="#">
-              像素冒險故事集
+              上個班怎mo這mo辛苦
             </a>
           </div>
         </header>
@@ -373,9 +318,9 @@ export default function Home() {
           <div className="relative">
             <PixelScene className="h-[250px] md:h-[280px]" />
             <div className="absolute bottom-8 left-7 right-7 border-[3px] border-[#5b4038] bg-white/90 p-4 shadow-[4px_4px_0_#3d2c24]">
-              <h1 className="text-3xl font-black text-[#776400]">歡迎來到像素元宇宙</h1>
+              <h1 className="text-3xl font-black text-[#776400]">歡迎來到「上個班怎mo這mo辛苦」</h1>
               <p className="mt-2 text-base font-medium leading-6 text-[#5f5a50]">
-                這是一個充滿驚奇與色彩的 8-bit 世界。跟隨我們的英雄，踏上一場關於勇氣、智慧與友情的不凡旅程。
+                這是一個充滿驚嚇與白眼的世界。跟隨我們的腳步，踏上一場關於可憐、荒謬的旅程。
               </p>
             </div>
           </div>
