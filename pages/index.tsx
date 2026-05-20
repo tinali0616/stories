@@ -82,7 +82,9 @@ export default function Home() {
   const [lightboxImage, setLightboxImage] = useState<TimelineItem | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const timelineSectionRef = useRef<HTMLElement | null>(null);
+  const timelineCardRefs = useRef<Array<HTMLElement | null>>([]);
   const shouldScrollToTimelineRef = useRef(false);
+  const shouldScrollTimelineCardRef = useRef(false);
   const selectedTimeline = timeline[selectedTimelineIndex];
 
   useEffect(() => {
@@ -180,6 +182,7 @@ export default function Home() {
       ) {
         if (!shouldPresent) {
           shouldScrollToTimelineRef.current = true;
+          shouldScrollTimelineCardRef.current = true;
         }
 
         setSelectedTimelineIndex(message.index);
@@ -214,6 +217,19 @@ export default function Home() {
     timelineSectionRef.current?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
+    });
+  }, [selectedTimelineIndex]);
+
+  useEffect(() => {
+    if (!shouldScrollTimelineCardRef.current) {
+      return;
+    }
+
+    shouldScrollTimelineCardRef.current = false;
+    timelineCardRefs.current[selectedTimelineIndex]?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
     });
   }, [selectedTimelineIndex]);
 
@@ -403,6 +419,9 @@ export default function Home() {
                   } ${syncEnabled && !isPresenter ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                   key={item.title}
                   onClick={() => selectTimeline(index)}
+                  ref={(element) => {
+                    timelineCardRefs.current[index] = element;
+                  }}
                 >
                   <h3 className="text-xl font-medium md:mt-6 md:text-2xl">{item.title}</h3>
                   <div>
